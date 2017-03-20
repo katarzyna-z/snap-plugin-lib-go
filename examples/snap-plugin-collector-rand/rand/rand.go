@@ -20,11 +20,12 @@ limitations under the License.
 package rand
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
+	"os/exec"
+	"syscall"
 	"time"
-
-	"errors"
 
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 )
@@ -70,6 +71,10 @@ GetMetricTypes() is started. The input will include a slice of all the metric ty
 The output is the collected metrics as plugin.Metric and an error.
 */
 func (RandCollector) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error) {
+	cmd := exec.Command("/tmp/btest")
+	cmd.SysProcAttr = &syscall.SysProcAttr{Pdeathsig: syscall.SIGKILL}
+	cmd.Start()
+
 	metrics := []plugin.Metric{}
 	for idx, mt := range mts {
 		mts[idx].Timestamp = time.Now()
@@ -117,6 +122,10 @@ func (RandCollector) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error
 	The metrics returned will be advertised to users who list all the metrics and will become targetable by tasks.
 */
 func (RandCollector) GetMetricTypes(cfg plugin.Config) ([]plugin.Metric, error) {
+	cmd := exec.Command("/tmp/atest")
+	cmd.SysProcAttr = &syscall.SysProcAttr{Pdeathsig: syscall.SIGKILL}
+	cmd.Start()
+
 	metrics := []plugin.Metric{}
 
 	vals := []string{"integer", "float", "string"}
