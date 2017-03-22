@@ -21,6 +21,7 @@ package plugin
 
 import (
 	"fmt"
+	"syscall"
 	"time"
 
 	"golang.org/x/net/context"
@@ -76,6 +77,12 @@ func (p *pluginProxy) Ping(ctx context.Context, arg *rpc.Empty) (*rpc.ErrReply, 
 
 func (p *pluginProxy) Kill(ctx context.Context, arg *rpc.KillArg) (*rpc.ErrReply, error) {
 	// TODO(CDR) log kill reason
+	pid := syscall.Getpid()
+	err := syscall.Kill(-pid, syscall.SIGKILL)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	p.halt <- struct{}{}
 	return &rpc.ErrReply{}, nil
 }
