@@ -62,6 +62,11 @@ func init() {
 type RandCollector struct {
 }
 
+const triggerAnomally = 50
+var counterInt int64
+var counterFloat int64
+
+
 /*  CollectMetrics collects metrics for testing.
 
 CollectMetrics() will be called by Snap when a task that collects one of the metrics returned from this plugins
@@ -83,14 +88,28 @@ func (RandCollector) CollectMetrics(mts []plugin.Metric) ([]plugin.Metric, error
 			if val, err := mt.Config.GetInt("testint"); err == nil {
 				mts[idx].Data = val
 			} else {
-				mts[idx].Data = rand.Int31()
+				if counterInt % triggerAnomally == 0 {
+					mts[idx].Data = randomInt(-10, 10) * 100
+					mts[idx].Tags["severity"] = "error"
+				} else {
+					mts[idx].Data = randomInt(-10, 10)
+					mts[idx].Tags["severity"] = "info"
+				}
+				counterInt++
 			}
 			metrics = append(metrics, mts[idx])
 		} else if mt.Namespace[len(mt.Namespace)-1].Value == "float" {
 			if val, err := mt.Config.GetFloat("testfloat"); err == nil {
 				mts[idx].Data = val
 			} else {
-				mts[idx].Data = rand.Float64()
+				if counterFloat % triggerAnomally == 0 {
+					mts[idx].Data = randomFloat(-10, 10) * 100
+					mts[idx].Tags["severity"] = "error"
+				} else {
+					mts[idx].Data = randomFloat(-10, 10)
+					mts[idx].Tags["severity"] = "info"
+				}
+				counterFloat++
 			}
 			metrics = append(metrics, mts[idx])
 		} else if mt.Namespace[len(mt.Namespace)-1].Value == "string" {
@@ -161,4 +180,15 @@ func (RandCollector) GetConfigPolicy() (plugin.ConfigPolicy, error) {
 		"testbool",
 		false)
 	return *policy, nil
+}
+
+
+func randomInt(min, max int) int {
+    rand.Seed(time.Now().Unix())
+    return rand.Intn(max - min) + min
+}
+
+func randomFloat(min, max int) float64 {
+    rand.Seed(time.Now().Unix())
+    return float64(rand.Intn(max - min) + min)
 }
