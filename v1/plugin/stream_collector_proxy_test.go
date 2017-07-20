@@ -124,7 +124,7 @@ func TestStreamMetrics(t *testing.T) {
 				So(pl.outMetric, ShouldNotBeNil)
 				// Create mocked metrics
 				metrics := []Metric{
-					Metric{},
+					{},
 				}
 				// Send metrics down to channel every 100 ms
 				pl.doAction(time.Millisecond*100, metrics)
